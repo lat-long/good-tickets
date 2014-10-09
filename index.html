@@ -23,11 +23,11 @@
 			*/
 	    	$('#pagepiling').pagepiling({
 	    		menu: '#menu',
-	    		anchors: ['page1', 'page2', 'page3', 'page4','page5','page6'],
-			    sectionsColor: ['white', '#ee005a', '#2C3E50', '#39C', '#3D9970','#85144B'],
+	    		anchors: ['page1', 'page2', 'page3', 'page4','page5','page6','page7'],
+			    sectionsColor: ['white', '#ee005a', '#2C3E50', '#39C', '#3D9970','#85144B','#0B5093'],
 			    navigation: {
 			    	'position': 'right',
-			   		'tooltips': ['Home', 'Title', 'Steps', 'URL', 'Screenshot', 'Browser']
+			   		'tooltips': ['Home', 'Title', 'Steps', 'URL', 'Screenshot', 'Browser','Made By']
 			   	},
 			    afterRender: function(){
 			    	$('#pp-nav').addClass('custom');
@@ -112,6 +112,10 @@
 	#section4 p{
 		opacity: 0.6;
 	}
+	
+	#section7 a, 	#section7 a:visited {
+		color: #3D9970;
+	}
 
 	/* Overwriting fullPage.js tooltip color
 	* --------------------------------------- */
@@ -189,6 +193,22 @@
 	    	<div class="intro">
 	    		<h1>Browser Info.</h1>
 	    		<p>At the end of each ticket, just through in a quick line about what technology you are using to test. <q>IE7, WinXP</q> or <q>Chrome 11, Mac OS 10.4</q> are both fine examples. <q>Internet Explorer</q> is not- that's just lazy. Provide the browser version and operating system you are using to help the development team see what you are seeing.</p>
+	    	</div>
+	    </div>
+	    <div class="section" id="section7">
+	    	<div class="intro">
+	    		<h1>Made by Developers.</h1>
+	    		<p>This totally awesome site was made by the team behind <a href="http://a022digital.com?src=anatomy">A022 Digital</a> and <a href="http://alumnispaces.com?src=anatomy">Alumni Spaces</a>. Collectively we've launched nearly 100 websites/apps and have determined these tips to be the cardinal rules of bug reports.
+	    		</p>
+	    		<p>
+		    		Final note: if you are using Excel for bug tracking, you are doing it wrong. There are millions of options out there and we've successfully used about a dozen systems, most recently <a href="http://github.com">GitHub Issues</a>, <a href="http://freshdesk.com">Freshdesk</a> and <a href="https://www.atlassian.com/software/jira">Jira</a>.  They all have strengths and weaknesses but there are literally hundreds of systems that are better than Excel.  Use them. 
+		    	</p>
+	    		
+	    		<p class="intro">
+	    			Made with <a href="https://github.com/alvarotrigo/pagePiling.js">pagePiling.js</a> by @alvarotrigo.<br />Built by <a href="https://twitter.com/acafourek">@acafourek</a><br />Additions? Add them <a href="https://github.com/acafourek/good-tickets">on GitHub</a><br /><br />
+	    			
+	    			<img src="http://d3dhhryxzq9zg6.cloudfront.net/as-site/misc/Made-in-BK-logo-Full-size-invert.png" />
+	    		</p>
 	    	</div>
 	    </div>
 	</div>
