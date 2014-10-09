@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Anatomy Of A Good Ticket</title>
+	<meta name="author" content="Andrew Cafourek" />
+	<meta name="description" content="A Quick guide to writing website testing tickets and bug reports that are actually useful, as written by a project manager and web developer." />
+	<meta name="Resource-type" content="Document" />
+
+	<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Lato:300,400,700" />
+	<link rel="stylesheet" type="text/css" href="./css/jquery.pagepiling.css" />
+	<link rel="stylesheet" type="text/css" href="./css/examples.css" />
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+	<script type="text/javascript" src="./js/jquery.pagepiling.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+
+			/*
+			* Plugin intialization
+			*/
+	    	$('#pagepiling').pagepiling({
+	    		menu: '#menu',
+	    		anchors: ['page1', 'page2', 'page3', 'page4','page5','page6'],
+			    sectionsColor: ['white', '#ee005a', '#2C3E50', '#39C', '#3D9970','#85144B'],
+			    navigation: {
+			    	'position': 'right',
+			   		'tooltips': ['Page 1', 'Page 2', 'Page 3', 'Pgae 4']
+			   	},
+			    afterRender: function(){
+			    	$('#pp-nav').addClass('custom');
+			    },
+			    afterLoad: function(anchorLink, index){
+			    	if(index>1){
+			    		$('#pp-nav').removeClass('custom');
+			    	}else{
+			    		$('#pp-nav').addClass('custom');
+			    	}
+			    }
+			});
+	    });
+    </script>
+
+
+    <style>
+    /* Section 1
+	 * --------------------------------------- */
+	#section1 h1{
+		color: #444;
+	}
+	#section1 p{
+		color: #333;
+		color: rgba(0,0,0,0.3);
+	}
+	#section1 img{
+		margin: 20px 0;
+		opacity: 0.7;
+	}
+
+	/* Section 2
+	 * --------------------------------------- */
+	#section2 h1,
+	#section2 p{
+		z-index: 3;
+	}
+	#section2 p{
+		opacity: 0.8;
+	}
+
+	/* Section 3
+	 * --------------------------------------- */
+	#section3 #colors{
+		left: 60px;
+		bottom: 0;
+	}
+	#section3 p{
+		color: #757575;
+	}
+
+	/* Section 4
+	 * --------------------------------------- */
+	#section4 p{
+		opacity: 0.6;
+	}
+
+	/* Overwriting fullPage.js tooltip color
+	* --------------------------------------- */
+	#pp-nav.custom .pp-tooltip{
+		color: #AAA;
+	}
+	#markup{
+		display: block;
+		width: 450px;
+		margin: 20px auto;
+		text-align: left;
+	}
+
+</style>
+
+</head>
+<body>
+	<ul id="menu">
+		<li data-menuanchor="page1" class="active"><a href="#page1">Home</a></li>
+		<li data-menuanchor="page2"><a href="#page2">Title</a></li>
+		<li data-menuanchor="page3"><a href="#page3">Steps</a></li>
+		<li data-menuanchor="page4"><a href="#page4">URL</a></li>
+		<li data-menuanchor="page5"><a href="#page5">Screenshot</a></li>
+		<li data-menuanchor="page6"><a href="#page6">Browser</a></li>
+	</ul>
+
+
+	<div id="pagepiling">
+	    <div class="section" id="section1">
+	    	<h1>Anatomy of a Good Ticket</h1>
+			<p>How to suck less at testing.</p>
+			<br />
+
+	    </div>
+	    <div class="section" id="section2">
+	    	<div class="intro">
+	    		<div id="colors"></div>
+	    		<h1>Descriptive Title</h1>
+	    		<p>"Link Color" is not a good ticket title. "Incorrect text color when hovering on link" is a much better title and means the dev does not have to click into the ticket to understand the general issue. The worst of ticket title of all time is "Site not working/Site broken".  Take an extra 3 seconds to describe the issue in context and you save people a ton of time down the road. But make sure not to go crazy: "The 3rd time in a search results page for 'Chicken Soup' looks funny in IE6 if I disable javascript" is too much information. Just like sending an email, both the Subject and Content areas have a purpose.</p>
+	    	</div>
+	    </div>
+	    <div class="section" id="section3">
+	    	<div class="intro">
+	    		<h1>Steps to Reproduce.</h1>
+	    		<p>The more you break down how you discovered a bug, the easier it is to isolate the issue. Front-end issues usually only have a series of steps if you are expanding/collapsing on-page elements, but when you see an error page, incorrect data or a flawed user flow, there are probably numerical steps you can describe to walk someone through how to see what you are seeing. An example trail of breadcrumbs that would help a dev get to the right spot:  
+		    		<ol>
+		    			<li>1) logged in using this URL.</li>
+		    			<li>2) clicked "my account" in drop down at top right of the page</li> 
+		    			<li>3) Clicked "Edit Profile" under profile image</li>
+		    			<li>4) Entered new email address 'test@testing.com'</li> 
+		    			<li>5) Tabbed to Submit button and hit Enter</li> 
+		    			<li>6) Saw this error page:"  Sometimes this is an simple as "Go to this URL" but especially involving complicated processes, be specific as if you were teaching someone how to do something.</li>
+		    		</ol>
+	    		</p>
+	    	</div>
+	    </div>
+	    <div class="section" id="section4">
+	    	<div class="intro">
+	    		<h1>URL.</h1>
+	    		<p>Never ever ever ever submit a ticket without a URL pasted into the description- even if it is a site wide issue, include 1 or 2 example links ("As seen on:"). Getting a ticket that describes a UI problem is almost completely unactionable if the front-end developer doesn't know what page you are referencing. The most common incorrect shortcut is "My registration date is missing from the account page" where the tester describes what page they are on without actually linking to it- sometimes the dev will get there, but you never really know how the development team has been referring to pages, so "Account" could mean any one of 12 pages. Everything online has a URL and with a quick Ctrl+C/Ctrl+V, you can make everyone's life easier and cut down on "what page do you mean?" emails.</p>
+	    	</div>
+	    </div>
+	    <div class="section" id="section5">
+	    	<div class="intro">
+	    		<h1>Screenshot.</h1>
+	    		<p>As with anything, a picture is worth a thousand words, and it is super easy to take a screenshot.  If you are on a PC, use a program like SnagIt or learn how to use Print Screen. On a Mac, Cmd+Shift+4 lets you use a crosshair to capture a section of the screen. In a browser, there are tons of plugins for Chrome/Firefox to make this easy.  Whether you are seeing an error, something misaligned, or not seeing something that you should- take a screenshot and point out where the issue is/where the missing data is expected to be. Bonus points if you add a red box or arrow to the image that makes it impossible to miss what you are talking about. Also, try to take a screenshot large enough to provide context- a screenshot taken when zoomed in on a navigation bar loses context because I don't necessarily know what nab element you are on- make sure your image captures what is wrong but leaves enough context to make it apparent where it is wrong. (Of course the opposite is also true- a full page screenshot to point out a 3 px variation is not very helpful)</p>
+	    	</div>
+	    </div>
+	    <div class="section" id="section6">
+	    	<div class="intro">
+	    		<h1>Browser Info.</h1>
+	    		<p>At the end of each ticket, just through in a quick line about what technology you are using to test. "IE7, WinXP", "Chrome 11, Mac OS 10.4" are both fine examples. "Internet Explorer" is not- provide the browser version and operating system you are using to help the dev team see what you are seeing.</p>
+	    	</div>
+	    </div>
+	</div>
+
+</body>
+</html>
