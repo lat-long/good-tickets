@@ -8,9 +8,10 @@
 	<meta name="description" content="A quick guide to writing website testing tickets and bug reports that are actually useful, as written by a project manager and web developer." />
 	<meta name="Resource-type" content="Document" />
 
-	<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Lato:300,400,700" />
+	<link rel="stylesheet" href="https://use.typekit.net/huf2dhj.css">
 	<link rel="stylesheet" type="text/css" href="./css/jquery.pagepiling.css" />
-	<link rel="stylesheet" type="text/css" href="./css/examples.css" />
+	<link rel="stylesheet" type="text/css" href="./css/styles.css" />
+	
 
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 
@@ -24,7 +25,7 @@
 	    	$('#pagepiling').pagepiling({
 	    		menu: '#menu',
 	    		anchors: ['page1', 'page2', 'page3', 'page4','page5','page6','page7'],
-			    sectionsColor: ['white', '#ee005a', '#2C3E50', '#39C', '#3D9970','#85144B','#0B5093'],
+			    sectionsColor: ['white', '#010B3F', '#fff', '#FFE9D2', '#1F2737','#8D020B','#F9F3ED'],
 			    navigation: {
 			    	'position': 'right',
 			   		'tooltips': ['Home', 'Title', 'Steps', 'URL', 'Screenshot', 'Browser','Made By']
@@ -42,95 +43,6 @@
 			});
 	    });
     </script>
-
-
-    <style>
-
-    p q {
-	    background: rgba(255, 255, 255, .9);
-		-webkit-border-radius: 10px;
-		border-radius: 10px;
-		padding: .1em .25em;
-		margin: 0 .5em;
-		opacity: 1;
-		color: #000;
-		font-size: .9em;
-    }
-    p q::before{
-	    content: "\201C";
-    }
-	p q::after {
-	    content: "\201D";
-    }
-    
-    ol {
-	    list-style-type: decimal !important;
-	    list-style-position: inside;
-    }
-    h3 {
-	    font-size: 1.4em;
-    }
-    small {
-	    font-size: .7em;
-    }
-    /* Section 1
-	 * --------------------------------------- */
-	#section1 h1{
-		color: #444;
-	}
-	#section1 p{
-		color: #333;
-		color: rgba(0,0,0,0.3);
-	}
-	#section1 img{
-		margin: 20px 0;
-		opacity: 0.7;
-	}
-
-	/* Section 2
-	 * --------------------------------------- */
-	#section2 h1,
-	#section2 p{
-		z-index: 3;
-	}
-	#section2 p{
-		opacity: 0.8;
-	}
-
-	/* Section 3
-	 * --------------------------------------- */
-	#section3 #colors{
-		left: 60px;
-		bottom: 0;
-	}
-	#section3 p{
-		color: #757575;
-	}
-
-	/* Section 4
-	 * --------------------------------------- */
-	#section4 p{
-		opacity: 0.6;
-	}
-	
-	#section7 a, 	#section7 a:visited {
-		color: #3D9970;
-	}
-
-	/* Overwriting fullPage.js tooltip color
-	* --------------------------------------- */
-	#pp-nav.custom .pp-tooltip{
-		color: #AAA;
-	}
-	#markup{
-		display: block;
-		width: 450px;
-		margin: 20px auto;
-		text-align: left;
-	}
-
-</style>
-
 </head>
 <body>
 	<ul id="menu">
@@ -149,65 +61,72 @@
 			<p>How to be a better tester, file better bug reports and get better help from developers.</p>
 	    </div>
 	    <div class="section" id="section2">
-	    	<div class="intro">
-	    		<div id="colors"></div>
+	    	<div class="intro light">
 	    		<h1>Descriptive Title</h1>
 	    		<p><q>Link Color</q> is not a good ticket title. <q>Incorrect text color when hovering on link</q> is a much better title and means the developer does not have to click into the ticket to understand the general issue.</p>
-	    		<p>The worst of ticket title of all time is <q>Site not working/Site broken</q></p>  
-	    		<p>Take an extra 3 seconds to describe the issue in context and you save people a ton of time down the road. But make sure not to go crazy: <q>The 3rd time in a search results page for '<i>Chicken Soup</i>' looks funny in IE6 if I disable javascript</q> is too much information. Just like sending an email, both the Subject and Content areas have a purpose.</p>
+	    		<p>The worst of title of all time is <q>Site not working/Site broken</q> <br />Something like <q>White screen when loading Product Detail page</q> is a step in theright direction.</p> 
+				<p>Take an extra 3 seconds to describe the issue in context and you save people a ton of time down the road.<br />But don't go crazy: <q>The 3rd result in a search results page for '<i>Chicken Soup</i>' looks funny in Firefox v43.9.81 if I disable javascript</q> is too much information.</p>
+				<p>Just like sending an email, both the Subject and Content areas have a purpose.</p>
 	    	</div>
 	    </div>
-	    <div class="section" id="section3">
+	    <div class="section pp-scrollable" id="section3">
 	    	<div class="intro">
 	    		<h1>Steps to Reproduce.</h1>
-	    		<p>The more you break down how you discovered a bug, the easier it is to isolate the issue. Front-end issues usually only have a series of steps if you are expanding/collapsing on-page elements, but when you see an error page, incorrect data or a flawed user flow, there are probably numerical steps you can describe to walk someone through how to see what you are seeing. An example trail of breadcrumbs that would help a dev get to the right spot. Sometimes this is as simple as <q>Go to this URL</q> but especially involving complicated processes, be specific as if you were teaching someone how to do something.
+				<p>The more you break down how you discovered a bug, the easier it is to isolate the issue.</p>
+				<p>For more basic layout/display issues, this can simply be detailed explanation fo where and how you saw the problem:</p> <blockquote>In the "Recent News" section of the homepage, the thumbnail image overlaps the decription when my browser is smaller than 900px</q> gives a ton of information in one short sentence.</blockquote>
+				<p>For more complex issues, there are probably numerical steps you can describe to walk someone through how to see what you are seeing and what steps led you to encounter this problem. This trail of breadcrumbs helps the developer reproduce exactly what you were doing and the problem you encountered. Be as specific as you can, as if you're teaching someone and explain what you expected to see vs what you actually saw.</p>
 	    		</p>
-		    	<p>
 		    		<ol>
-		    			<li>Logged in using this URL.</li>
-		    			<li>Clicked "my account" in drop down at top right of the page</li> 
-		    			<li>Clicked "Edit Profile" under profile image</li>
-		    			<li>Entered new email address 'test@testing.com'</li> 
+		    			<li>Started as a logged in user (username: <em>george</em> on the homepage</li>
+		    			<li>Clicked "My Account" in drop down at top right of the page</li> 
+		    			<li>Clicked "Edit Profile" under the profile image</li>
+		    			<li>Entered new email address 'george@mtvernon.org'</li> 
 		    			<li>Tabbed to Submit button and hit Enter</li> 
 		    			<li>Saw this error: "The doohiky isn't connected properly to the whatsit so the thingamabob failed to process the whatchamacallit."</li>
 		    		</ol>
-	    		</p>
 	    	</div>
 	    </div>
 	    <div class="section" id="section4">
 	    	<div class="intro">
-	    		<h1>URL.</h1>
+	    		<h1 class="red">URL</h1>
 	    		<h3>Never ever ever ever submit a ticket without a clickable URL</h3>
 	    		<p>Seriously. Even if it is a site wide issue, include 1 or 2 example links. Getting a ticket that describes a visual problem is almost completely useless if the front-end developer doesn't know what page you are referencing.</p>
-	    		<p>The most common incorrect shortcut goes something like this: <q>My registration date is missing from the account page</q> Here, the tester describes the page without actually linking to it- sometimes the developer will get there, but you never really know how others have been referring to pages, so "Account Page" could mean one thing to the marketing team, another thing to the UI team and yet another to the back-end developer. Everything online has a URL and with a quick &#8984;+C/&#8984;+V <small>(or Ctrl+C/Ctrl+V)</small>, you can make everyone's life easier and cut down on <q>What page do you mean?</q> emails.
+				<p>The most common incorrect shortcut goes something like this: <q>My registration date is missing from the account page</q></p>
+				<p>Here, the tester describes the page without actually linking to it- you never really know how others have been referring to pages, so "Account Page" could mean one thing to the marketing team, another thing to the UI team and yet another to the back-end developer.</p>
+				<p>Everything online has a URL and with a quick &#8984;+C/&#8984;+V <small>(or Ctrl+C/Ctrl+V)</small>, you can make everyone's life easier and cut down on <q>What page do you mean?</q> emails.
 	    		</p>
 	    	</div>
 	    </div>
 	    <div class="section" id="section5">
 	    	<div class="intro">
 	    		<h1>Screenshot.</h1>
-	    		<p>As with anything, a picture is worth a thousand words, and it is super easy to take a screenshot.  If you are on a PC, use a program like SnagIt or learn how to use Print Screen. On a Mac, Cmd+Shift+4 gives you use a crosshair to capture a section of the screen. I also recommend <a href="http://evernote.com/skitch/?utm_source=interspire">Skitch</a> for either PC or Mac. In a browser, there are tons of plugins for Chrome/Firefox to make this easy.  Whether you are seeing an error, something misaligned, or not seeing something that you should- take a screenshot and point out where the issue is/where the missing data is expected to be. Bonus points if you add a red box or arrow to the image that makes it impossible to miss what you are talking about. Also, try to take a screenshot large enough to provide context- make sure your image captures what is wrong but leaves enough context to make it apparent <i>where</i> it is wrong. <small>(Of course the opposite is also true- a full page screenshot to point out a 3px variation is not very helpful)</small></p>
+				<p>A picture is worth a thousand words, and it is super easy to take a screenshot. On a Mac, Cmd+Shift+4 gives you use a crosshair to capture a section of the screen. We also recommend <a href="http://evernote.com/skitch/?utm_source=interspire">Skitch</a> or <a href="https://www.techsmith.com/screen-capture.html">SnagIt</a>, programs that makes it easy to add notes and arrows. Double bonus points if make a GIF/video of your workflow for complex issues.</p>
+				<p>Take a screenshot and point out where the issue is/where the missing data is expected to be. Make it large enough to provide context- your image should capture what is wrong but leave enough context to make it apparent <i>where</i> it is wrong. <small>(Of course the opposite is also true- a full page screenshot to point out a 3px variation is not very helpful)</small></p>
 	    	</div>
 	    </div>
 	    <div class="section" id="section6">
 	    	<div class="intro">
 	    		<h1>Browser Info.</h1>
-	    		<p>At the end of each ticket, just through in a quick line about what technology you are using to test. <q>IE7, WinXP</q> or <q>Chrome 11, Mac OS 10.4</q> are both fine examples. <q>Internet Explorer</q> is not- that's just lazy. Provide the browser version and operating system you are using to help the development team see what you are seeing.</p>
+				<p>Especially if you're reporting a design/layout/style problem, make sure to include a line about the technology you're using to test.</p>
+				<p><q>IE7, WinXP</q> or <q>Chrome 11, Mac OS 10.4</q> are both fine examples. Provide the browser version and operating system you are using to help the development team see what you are seeing.</p>
+				<p>Tools like <a href="https://supportdetails.com/">SupportDetails</a> and <a href="https://www.whatsmybrowser.org/">What's My Browser</a> make this incredibly easy.</p>
 	    	</div>
 	    </div>
 	    <div class="section" id="section7">
 	    	<div class="intro">
-	    		<h1>Made by Developers.</h1>
-	    		<p>This totally awesome site was made by the team behind <a href="http://a022digital.com?src=anatomy">A022 Digital</a> and <a href="http://alumnispaces.com?src=anatomy">Alumni Spaces</a>. Collectively we've launched nearly 100 websites/apps and have determined these tips to be the cardinal rules of bug reports.
+				<h1>Made by Developers.</h1>
+				<a href="https://latlo.ng">
+					<img src="https://lat-long-cdn.s3.amazonaws.com/Branding/SVG/mark-red.svg" width="100">
+				</a>
+	    		<p>This totally awesome site was made by the team at <a href="https://latlo.ng?src=anatomy">Lat Long</a>. Collectively we've launched 100+ websites/apps and have determined these tips to be the cardinal rules of bug reports.
 	    		</p>
 	    		<p>
-		    		Final note: if you are using Excel for bug tracking, you are doing it wrong. There are millions of options out there and we recommend <a href="http://github.com">GitHub Issues</a>, <a href="http://freshdesk.com">Freshdesk</a> or <a href="https://www.atlassian.com/software/jira">Jira</a>.  They all have strengths and weaknesses but there are literally hundreds of systems that are better than Excel.  Use them. 
-		    	</p>
+		    		Final note: if you are using Excel for bug tracking, you are doing it wrong. There are millions of options out there and we recommend <a href="http://github.com">GitHub Issues</a> or <a href="https://trello.com/">Trello</a>. All tools have strengths and weaknesses but there are literally hundreds of systems that are better than Excel.  Use them. 
+				</p>
+				<p>Other tools like <a href="https://marker.io">Marker.io</a> or <a href="https://get.bugherd.com/">BugHerd</a> go a step further and make this entire process of screenshots, URLs, descriptions and browser info seamless.</p>
 	    		
 	    		<p class="intro">
-	    			Made with <a href="https://github.com/alvarotrigo/pagePiling.js">pagePiling.js</a> by @alvarotrigo.<br />Built by <a href="https://twitter.com/acafourek">@acafourek</a><br />Additions? Add them <a href="https://github.com/acafourek/good-tickets">on GitHub</a><br /><br />
-	    			
-	    			<img src="http://d3dhhryxzq9zg6.cloudfront.net/as-site/misc/Made-in-BK-logo-Full-size-invert.png" />
+	    			Made with <a href="https://github.com/alvarotrigo/pagePiling.js">pagePiling.js</a> by @alvarotrigo.<br />Additions? Add them <a href="https://github.com/acafourek/good-tickets">on GitHub</a><br /><br />	    			
 	    		</p>
 	    	</div>
 	    </div>
