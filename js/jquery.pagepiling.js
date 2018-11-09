@@ -1,19 +1,22 @@
-/* ===========================================================
- * pagepiling.js 0.0.2 (Beta)
+/*!
+ * pagepiling.js 1.5.5
  *
- * https://github.com/alvarotrigo/fullPage.js
- * MIT licensed
+ * https://github.com/alvarotrigo/pagePiling.js
+ * @license MIT licensed
  *
- * Copyright (C) 2013 alvarotrigo.com - A project by Alvaro Trigo
- *
- * ========================================================== */
+ * Copyright (C) 2016 alvarotrigo.com - A project by Alvaro Trigo
+ */
+(function ($, document, window, undefined) {
+    'use strict';
 
-(function ($) {
-    $.fn.pagepiling = function (options) {
+    $.fn.pagepiling = function (custom) {
+        var PP = $.fn.pagepiling;
         var container = $(this);
         var lastScrolledDestiny;
         var lastAnimation = 0;
-        var isTouch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
+        var isTouch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0) || (navigator.maxTouchPoints));
+        var touchStartY = 0, touchStartX = 0, touchEndY = 0, touchEndX = 0;
+        var scrollings = [];
 
         //Defines the delay to take place before being able to scroll to the next section
         //BE CAREFUL! Not recommened to change it under 400 for a good behavior in laptops and
@@ -21,22 +24,24 @@
         var scrollDelay = 600;
 
         // Create some defaults, extending them with any options that were provided
-        options = $.extend({
+        var options = $.extend(true, {
+            direction: 'vertical',
             menu: null,
             verticalCentered: true,
             sectionsColor: [],
             anchors: [],
             scrollingSpeed: 700,
-            easing: 'swing',
+            easing: 'easeInQuart',
             loopBottom: false,
             loopTop: false,
             css3: true,
             navigation: {
-                'textColor': '#000',
-                'bulletsColor': '#000',
-                'position': 'right',
-                'tooltips': ['section1', 'section2', 'section3', 'section4']
+                textColor: '#000',
+                bulletsColor: '#000',
+                position: 'right',
+                tooltips: []
             },
+            normalScrollElements: null,
             normalScrollElementTouchThreshold: 5,
             touchSensitivity: 5,
             keyboardScrolling: true,
@@ -47,20 +52,23 @@
             afterLoad: null,
             onLeave: null,
             afterRender: null
-        }, options);
+        }, custom);
 
+
+        //easeInQuart animation included in the plugin
+        $.extend($.easing,{ easeInQuart: function (x, t, b, c, d) { return c*(t/=d)*t*t*t + b; }});
 
         /**
         * Defines the scrolling speed
         */
-        $.fn.pagepiling.setScrollingSpeed = function(value){
+        PP.setScrollingSpeed = function(value){
            options.scrollingSpeed = value;
         };
 
         /**
         * Adds or remove the possiblity of scrolling through sections by using the mouse wheel or the trackpad.
         */
-        $.fn.pagepiling.setMouseWheelScrolling = function (value){
+        PP.setMouseWheelScrolling = function (value){
             if(value){
                 addMouseWheelHandler();
             }else{
@@ -71,12 +79,12 @@
         /**
         * Adds or remove the possiblity of scrolling through sections by using the mouse wheel/trackpad or touch gestures.
         */
-        $.fn.pagepiling.setAllowScrolling = function (value){
+        PP.setAllowScrolling = function (value){
             if(value){
-                $.fn.pagepiling.setMouseWheelScrolling(true);
+                PP.setMouseWheelScrolling(true);
                 addTouchHandler();
             }else{
-                $.fn.pagepiling.setMouseWheelScrolling(false);
+                PP.setMouseWheelScrolling(false);
                 removeTouchHandler();
             }
         };
@@ -84,14 +92,14 @@
         /**
         * Adds or remove the possiblity of scrolling through sections by using the keyboard arrow keys
         */
-        $.fn.pagepiling.setKeyboardScrolling = function (value){
+        PP.setKeyboardScrolling = function (value){
             options.keyboardScrolling = value;
         };
 
         /**
         * Moves sectio up
         */
-        $.fn.pagepiling.moveSectionUp = function () {
+        PP.moveSectionUp = function () {
             var prev = $('.pp-section.active').prev('.pp-section');
 
             //looping to the bottom if there's no more sections above
@@ -107,7 +115,7 @@
         /**
         * Moves sectio down
         */
-        $.fn.pagepiling.moveSectionDown = function () {
+        PP.moveSectionDown = function () {
             var next = $('.pp-section.active').next('.pp-section');
 
             //looping to the top if there's no more sections below
@@ -123,11 +131,11 @@
         /**
         * Moves the site to the given anchor or index
         */
-        $.fn.pagepiling.moveTo = function (section){
+        PP.moveTo = function (section){
             var destiny = '';
 
             if(isNaN(section)){
-                destiny = $('[data-anchor="'+section+'"]');
+                destiny = $(document).find('[data-anchor="'+section+'"]');
             }else{
                 destiny = $('.pp-section').eq( (section -1) );
             }
@@ -155,7 +163,7 @@
         });
 
         //init
-        $.fn.pagepiling.setAllowScrolling(true);
+        PP.setAllowScrolling(true);
 
         //creating the navigation dots
         if (!$.isEmptyObject(options.navigation) ) {
@@ -181,7 +189,7 @@
                 $(this).css('background-color', options.sectionsColor[index]);
             }
 
-            if(options.verticalCentered){
+            if(options.verticalCentered && !$(this).hasClass('pp-scrollable')){
                 addTableClass($(this));
             }
 
@@ -200,7 +208,6 @@
             $.isFunction( options.afterRender ) && options.afterRender.call( this);
         });
 
-
         /**
         * Enables vertical centering by wrapping the content and the use of table and table-cell
         */
@@ -208,147 +215,209 @@
             element.addClass('pp-table').wrapInner('<div class="pp-tableCell" style="height:100%" />');
         }
 
-        /**
-        * Determines the direction of the movement (up or down)
-        */
-        function getYmovement(){
-             var sectionIndex = destination.index('.pp-section');
 
-             if( $('.pp-section.active').index('.pp-section') < sectionIndex ){
-                return 'down';
-             }
-             return 'up';
+       /**
+        * Retuns `up` or `down` depending on the scrolling movement to reach its destination
+        * from the current section.
+        */
+        function getYmovement(destiny){
+            var fromIndex = $('.pp-section.active').index('.pp-section');
+            var toIndex = destiny.index('.pp-section');
+
+            if(fromIndex > toIndex){
+                return 'up';
+            }
+            return 'down';
         }
 
         /**
         * Scrolls the page to the given destination
         */
         function scrollPage(destination, animated) {
-            var activeSection = $('.pp-section.active');
-            var anchorLink  = destination.data('anchor');
-            var sectionIndex = destination.index('.pp-section');
-            var toMove = destination;
-            var yMovement = getYmovement(destination);
-            var leavingSection = activeSection.index('.pp-section') + 1;
+            var v ={
+                destination: destination,
+                animated: animated,
+                activeSection: $('.pp-section.active'),
+                anchorLink: destination.data('anchor'),
+                sectionIndex: destination.index('.pp-section'),
+                toMove: destination,
+                yMovement: getYmovement(destination),
+                leavingSection: $('.pp-section.active').index('.pp-section') + 1
+            };
 
-            if(typeof animated === 'undefined'){
-                animated = true;
+            //quiting when activeSection is the target element
+            if(v.activeSection.is(destination)){ return; }
+
+            if(typeof v.animated === 'undefined'){
+                v.animated = true;
             }
 
-            if(typeof anchorLink !== 'undefined'){
-                setURLHash(anchorLink);
+            if(typeof v.anchorLink !== 'undefined'){
+                setURLHash(v.anchorLink, v.sectionIndex);
             }
 
-            destination.addClass('active').siblings().removeClass('active');
+            v.destination.addClass('active').siblings().removeClass('active');
 
-            //moving sections up making them disappear
-            if (activeSection.index('.pp-section') < sectionIndex) {
-                var translate3d = 'translate3d(0px, -100%, 0px)';
-                var scrolling = '-100%';
+            v.sectionsToMove = getSectionsToMove(v);
 
-                var sectionsToMove = $('.pp-section').map(function(index){
-                    if (index < destination.index('.pp-section')){
-                        return $(this);
-                    }
-                });
+            //scrolling down (moving sections up making them disappear)
+            if (v.yMovement === 'down') {
+                v.translate3d = getTranslate3d();
+                v.scrolling = '-100%';
 
                 if(!options.css3){
-                    sectionsToMove.each(function(index){
-                        if(index != activeSection.index('.pp-section')){
-                            $(this).css({'top': scrolling})
+                    v.sectionsToMove.each(function(index){
+                        if(index != v.activeSection.index('.pp-section')){
+                            $(this).css(getScrollProp(v.scrolling));
                         }
                     });
                 }
 
-                var animateSection = activeSection;
-                var readjustSections = function(){};
-
+                v.animateSection = v.activeSection;
             }
 
-            //moving section down to the viewport
+            //scrolling up (moving section down to the viewport)
             else {
-                var translate3d = 'translate3d(0px, 0px, 0px)';
-                var scrolling = '0';
+                v.translate3d = 'translate3d(0px, 0px, 0px)';
+                v.scrolling = '0';
 
-                var sectionsToMove = $('.pp-section').map(function(index){
-                    if (index > destination.index('.pp-section')){
-                        return $(this);
-                    }
-                });
-
-                var animateSection = destination;
-
-                var readjustSections = function(){
-                    sectionsToMove.each(function(index){
-                        $(this).css({'top': scrolling})
-                    });
-                };
+                v.animateSection = destination;
             }
 
-            var afterSectionLoads = function(){
-                //callback (afterLoad) if the site is not just resizing and readjusting the slides
-                $.isFunction(options.afterLoad) && options.afterLoad.call(this, anchorLink, (sectionIndex + 1));
-            }
+            $.isFunction(options.onLeave) && options.onLeave.call(this, v.leavingSection, (v.sectionIndex + 1), v.yMovement);
 
-            $.isFunction(options.onLeave) && options.onLeave.call(this, leavingSection, (sectionIndex + 1), yMovement);
+            performMovement(v);
 
-            if(options.css3){
-                transformContainer(animateSection, translate3d, animated);
-
-                sectionsToMove.each(function(){
-                    transformContainer($(this), translate3d, animated);
-                });
-
-                setTimeout(function () {
-                    afterSectionLoads();
-                }, options.scrollingSpeed);
-            }else{
-                if(animated){
-                    animateSection.animate({
-                        'top': scrolling
-                    }, options.scrollingSpeed, options.easing, function () {
-                        readjustSections();
-
-                        afterSectionLoads();
-                    });
-                }else{
-                    animateSection.css('top', scrolling);
-                    setTimeout(function(){
-                        readjustSections();
-                        afterSectionLoads();
-                    },400);
-
-                }
-            }
-
-            activateMenuElement(anchorLink);
-            activateNavDots(anchorLink, sectionIndex);
-            lastScrolledDestiny = anchorLink;
+            activateMenuElement(v.anchorLink);
+            activateNavDots(v.anchorLink, v.sectionIndex);
+            lastScrolledDestiny = v.anchorLink;
 
             var timeNow = new Date().getTime();
             lastAnimation = timeNow;
         }
 
         /**
+        * Performs the movement (by CSS3 or by jQuery)
+        */
+        function performMovement(v){
+            if(options.css3){
+                transformContainer(v.animateSection, v.translate3d, v.animated);
+
+                v.sectionsToMove.each(function(){
+                    transformContainer($(this), v.translate3d, v.animated);
+                });
+
+                setTimeout(function () {
+                    afterSectionLoads(v);
+                }, options.scrollingSpeed);
+            }else{
+                v.scrollOptions = getScrollProp(v.scrolling);
+
+                if(v.animated){
+                    v.animateSection.animate(
+                        v.scrollOptions,
+                    options.scrollingSpeed, options.easing, function () {
+                        readjustSections(v);
+                        afterSectionLoads(v);
+                    });
+                }else{
+                    v.animateSection.css(getScrollProp(v.scrolling));
+                    setTimeout(function(){
+                        readjustSections(v);
+                        afterSectionLoads(v);
+                    },400);
+                }
+            }
+        }
+
+        /**
+        * Actions to execute after a secion is loaded
+        */
+        function afterSectionLoads(v){
+            //callback (afterLoad) if the site is not just resizing and readjusting the slides
+            $.isFunction(options.afterLoad) && options.afterLoad.call(this, v.anchorLink, (v.sectionIndex + 1));
+        }
+
+
+        function getSectionsToMove(v){
+            var sectionToMove;
+
+            if(v.yMovement === 'down'){
+                sectionToMove = $('.pp-section').map(function(index){
+                    if (index < v.destination.index('.pp-section')){
+                        return $(this);
+                    }
+                });
+            }else{
+                sectionToMove = $('.pp-section').map(function(index){
+                    if (index > v.destination.index('.pp-section')){
+                        return $(this);
+                    }
+                });
+            }
+
+            return sectionToMove;
+        }
+
+        /**
+        * Returns the sections to re-adjust in the background after the section loads.
+        */
+        function readjustSections(v){
+            if(v.yMovement === 'up'){
+                v.sectionsToMove.each(function(index){
+                    $(this).css(getScrollProp(v.scrolling));
+                });
+            }
+        }
+
+        /**
+        * Gets the property used to create the scrolling effect when using jQuery animations
+        * depending on the plugin direction option.
+        */
+        function getScrollProp(propertyValue){
+            if(options.direction === 'vertical'){
+                return {'top': propertyValue};
+            }
+            return {'left': propertyValue};
+        }
+
+        /**
         * Scrolls the site without anymations (usually used in the background without the user noticing it)
         */
-        function silentScroll(section, top){
+        function silentScroll(section, offset){
             if (options.css3) {
-                var translate3d = 'translate3d(0px, ' + top + ', 0px)';
-                transformContainer(section, translate3d, false);
+                transformContainer(section, getTranslate3d(), false);
             }
-            else {
-                section.css("top", top);
+            else{
+                section.css(getScrollProp(offset));
             }
         }
 
         /**
         * Sets the URL hash for a section with slides
         */
-        function setURLHash(anchorLink){
+        function setURLHash(anchorLink, sectionIndex){
             if(options.anchors.length){
                 location.hash = anchorLink;
+
+                setBodyClass(location.hash);
+            }else{
+                setBodyClass(String(sectionIndex));
             }
+        }
+
+        /**
+        * Sets a class for the body of the page depending on the active section / slide
+        */
+        function setBodyClass(text){
+            //removing the #
+            text = text.replace('#','');
+
+            //removing previous anchor classes
+            $('body')[0].className = $('body')[0].className.replace(/\b\s?pp-viewing-[^\s]+\b/g, '');
+
+            //adding the current anchor
+            $('body').addClass('pp-viewing-' + text);
         }
 
         //TO DO
@@ -356,7 +425,7 @@
             //getting the anchor link in the URL and deleting the `#`
             var value =  window.location.hash.replace('#', '');
             var sectionAnchor = value;
-            var section = $('.pp-section[data-anchor="'+sectionAnchor+'"]');
+            var section = $(document).find('.pp-section[data-anchor="'+sectionAnchor+'"]');
 
             if(section.length > 0){  //if theres any #
                 scrollPage(section, options.animateAnchor);
@@ -388,19 +457,17 @@
             var sectionAnchor = value[0];
 
             if(sectionAnchor.length){
-                //when moving to a slide in the first section for the first time (first time to add an anchor to the URL)
-                var isFirstMove =  (typeof lastScrolledDestiny === 'undefined');
-
                 /*in order to call scrollpage() only once for each destination at a time
                 It is called twice for each scroll otherwise, as in case of using anchorlinks `hashChange`
                 event is fired on every scroll too.*/
                 if (sectionAnchor && sectionAnchor !== lastScrolledDestiny)  {
-                    if(isNaN(sectionAnchor)){
-                        var section = $('[data-anchor="'+sectionAnchor+'"]');
-                    }else{
-                        var section = $('.pp-section').eq( (sectionAnchor -1) );
-                    }
+                    var section;
 
+                    if(isNaN(sectionAnchor)){
+                        section = $(document).find('[data-anchor="'+sectionAnchor+'"]');
+                    }else{
+                        section = $('.pp-section').eq( (sectionAnchor -1) );
+                    }
                     scrollPage(section);
                 }
             }
@@ -434,36 +501,36 @@
             if(options.keyboardScrolling && !isMoving()){
                 //Moving the main page with the keyboard arrows if keyboard scrolling is enabled
                 switch (e.which) {
-                    //up
+                        //up
                     case 38:
                     case 33:
-                        $.fn.pagepiling.moveSectionUp();
+                        PP.moveSectionUp();
                         break;
 
                         //down
                     case 40:
                     case 34:
-                        $.fn.pagepiling.moveSectionDown();
+                        PP.moveSectionDown();
                         break;
 
                         //Home
                     case 36:
-                        $.fn.pagepiling.moveTo(1);
+                        PP.moveTo(1);
                         break;
 
                         //End
                     case 35:
-                        $.fn.pagepiling.moveTo($('.pp-section').length);
+                        PP.moveTo($('.pp-section').length);
                         break;
 
                         //left
                     case 37:
-                        $.fn.pagepiling.moveSlideLeft();
+                        PP.moveSectionUp();
                         break;
 
                         //right
                     case 39:
-                        $.fn.pagepiling.moveSlideRight();
+                        PP.moveSectionDown();
                         break;
 
                     default:
@@ -473,46 +540,110 @@
         });
 
         /**
+        * If `normalScrollElements` is used, the mouse wheel scrolling will scroll normally
+        * over the defined elements in the option.
+        */
+        if(options.normalScrollElements){
+            $(document).on('mouseenter', options.normalScrollElements, function () {
+                PP.setMouseWheelScrolling(false);
+            });
+
+            $(document).on('mouseleave', options.normalScrollElements, function(){
+                PP.setMouseWheelScrolling(true);
+            });
+        }
+
+        /**
          * Detecting mousewheel scrolling
          *
          * http://blogs.sitepointstatic.com/examples/tech/mouse-wheel/index.html
          * http://www.sitepoint.com/html5-javascript-mouse-wheel/
          */
-        function MouseWheelHandler(e) {
-            if(!isMoving()){
-                // cross-browser wheel delta
-                e = window.event || e;
-                var delta = Math.max(-1, Math.min(1,
-                        (e.wheelDelta || -e.deltaY || -e.detail)));
+        var prevTime = new Date().getTime();
 
+        function MouseWheelHandler(e) {
+        	var curTime = new Date().getTime();
+
+        	// cross-browser wheel delta
+            e = e || window.event;
+            var value = e.wheelDelta || -e.deltaY || -e.detail;
+            var delta = Math.max(-1, Math.min(1, value));
+
+            var horizontalDetection = typeof e.wheelDeltaX !== 'undefined' || typeof e.deltaX !== 'undefined';
+            var isScrollingVertically = (Math.abs(e.wheelDeltaX) < Math.abs(e.wheelDelta)) || (Math.abs(e.deltaX ) < Math.abs(e.deltaY) || !horizontalDetection);
+
+			//Limiting the array to 150 (lets not waste memory!)
+            if(scrollings.length > 149){
+                scrollings.shift();
+            }
+
+            //keeping record of the previous scrollings
+            scrollings.push(Math.abs(value));
+
+            //time difference between the last scroll and the current one
+            var timeDiff = curTime-prevTime;
+            prevTime = curTime;
+
+            //haven't they scrolled in a while?
+            //(enough to be consider a different scrolling action to scroll another section)
+            if(timeDiff > 200){
+                //emptying the array, we dont care about old scrollings for our averages
+                scrollings = [];
+            }
+
+            if(!isMoving()){
                 var activeSection = $('.pp-section.active');
                 var scrollable = isScrollable(activeSection);
 
-                //scrolling down?
-                if (delta < 0) {
-                    scrolling('down', scrollable);
+                var averageEnd = getAverage(scrollings, 10);
+                var averageMiddle = getAverage(scrollings, 70);
+                var isAccelerating = averageEnd >= averageMiddle;
 
-                //scrolling up?
-                }else {
-                    scrolling('up', scrollable);
-                }
+                if(isAccelerating && isScrollingVertically){
+	                //scrolling down?
+	                if (delta < 0) {
+	                    scrolling('down', scrollable);
 
+	                //scrolling up?
+	                }else if(delta>0){
+	                    scrolling('up', scrollable);
+	                }
+	            }
 
                 return false;
             }
          }
 
         /**
+        * Gets the average of the last `number` elements of the given array.
+        */
+        function getAverage(elements, number){
+            var sum = 0;
+
+            //taking `number` elements from the end to make the average, if there are not enought, 1
+            var lastElements = elements.slice(Math.max(elements.length - number, 1));
+
+            for(var i = 0; i < lastElements.length; i++){
+                sum = sum + lastElements[i];
+            }
+
+            return Math.ceil(sum/number);
+        }
+
+        /**
         * Determines the way of scrolling up or down:
         * by 'automatically' scrolling a section or by using the default and normal scrolling.
         */
         function scrolling(type, scrollable){
+            var check;
+            var scrollSection;
+
             if(type == 'down'){
-                var check = 'bottom';
-                var scrollSection = $.fn.pagepiling.moveSectionDown;
+                check = 'bottom';
+                scrollSection = PP.moveSectionDown;
             }else{
-                var check = 'top';
-                var scrollSection = $.fn.pagepiling.moveSectionUp;
+                check = 'top';
+                scrollSection = PP.moveSectionUp;
             }
 
             if(scrollable.length > 0 ){
@@ -523,8 +654,20 @@
                     return true;
                 }
             }else{
-                // moved up/down
+                //moved up/down
                 scrollSection();
+            }
+        }
+
+        /**
+        * Return a boolean depending on whether the scrollable element is at the end or at the start of the scrolling
+        * depending on the given type.
+        */
+        function isScrolled(type, scrollable){
+            if(type === 'top'){
+                return !scrollable.scrollTop();
+            }else if(type === 'bottom'){
+                return scrollable.scrollTop() + 1 + scrollable.innerHeight() >= scrollable[0].scrollHeight;
             }
         }
 
@@ -532,23 +675,7 @@
         * Determines whether the active section or slide is scrollable through and scrolling bar
         */
         function isScrollable(activeSection){
-            scrollable = activeSection.find('.pp-scrollable');
-
-            return scrollable;
-        }
-
-       /**
-        * Retuns `up` or `down` depending on the scrolling movement to reach its destination
-        * from the current section.
-        */
-        function getYmovement(destiny){
-            var fromIndex = $('.pp-section.active').index('.pp-section');
-            var toIndex = destiny.index('.pp-section');
-
-            if(fromIndex > toIndex){
-                return 'up';
-            }
-            return 'down';
+            return activeSection.filter('.pp-scrollable');
         }
 
         /**
@@ -560,7 +687,7 @@
                 container.get(0).removeEventListener('mousewheel', MouseWheelHandler, false); //IE9, Chrome, Safari, Oper
                 container.get(0).removeEventListener('wheel', MouseWheelHandler, false); //Firefox
             } else {
-                container.get(0).detachEvent("onmousewheel", MouseWheelHandler); //IE 6/7/8
+                container.get(0).detachEvent('onmousewheel', MouseWheelHandler); //IE 6/7/8
             }
         }
 
@@ -570,10 +697,10 @@
         */
         function addMouseWheelHandler(){
             if (container.get(0).addEventListener) {
-                container.get(0).addEventListener("mousewheel", MouseWheelHandler, false); //IE9, Chrome, Safari, Oper
-                container.get(0).addEventListener("wheel", MouseWheelHandler, false); //Firefox
+                container.get(0).addEventListener('mousewheel', MouseWheelHandler, false); //IE9, Chrome, Safari, Oper
+                container.get(0).addEventListener('wheel', MouseWheelHandler, false); //Firefox
             } else {
-                container.get(0).attachEvent("onmousewheel", MouseWheelHandler); //IE 6/7/8
+                container.get(0).attachEvent('onmousewheel', MouseWheelHandler); //IE 6/7/8
             }
         }
 
@@ -583,7 +710,7 @@
         function addTouchHandler(){
             if(isTouch){
                 //Microsoft pointers
-                MSPointer = getMSPointer();
+                var MSPointer = getMSPointer();
 
                 container.off('touchstart ' +  MSPointer.down).on('touchstart ' + MSPointer.down, touchStartHandler);
                 container.off('touchmove ' + MSPointer.move).on('touchmove ' + MSPointer.move, touchMoveHandler);
@@ -596,7 +723,7 @@
         function removeTouchHandler(){
             if(isTouch){
                 //Microsoft pointers
-                MSPointer = getMSPointer();
+                var MSPointer = getMSPointer();
 
                 container.off('touchstart ' + MSPointer.down);
                 container.off('touchmove ' + MSPointer.move);
@@ -610,14 +737,14 @@
         function getMSPointer(){
             var pointer;
 
-            //IE >= 11
+            //IE >= 11 & rest of browsers
             if(window.PointerEvent){
-                pointer = { down: "pointerdown", move: "pointermove", up: "pointerup"};
+                pointer = { down: 'pointerdown', move: 'pointermove', up: 'pointerup'};
             }
 
             //IE < 11
             else{
-                pointer = { down: "MSPointerDown", move: "MSPointerMove", up: "MSPointerUp"};
+                pointer = { down: 'MSPointerDown', move: 'MSPointerMove', up: 'MSPointerUp'};
             }
 
             return pointer;
@@ -629,25 +756,33 @@
         */
         function getEventsPage(e){
             var events = new Array();
-            if (window.navigator.msPointerEnabled){
-                events['y'] = e.pageY;
-                events['x'] = e.pageX;
-            }else{
-                events['y'] = e.touches[0].pageY;
-                events['x'] =  e.touches[0].pageX;
-            }
+
+            events.y = (typeof e.pageY !== 'undefined' && (e.pageY || e.pageX) ? e.pageY : e.touches[0].pageY);
+            events.x = (typeof e.pageX !== 'undefined' && (e.pageY || e.pageX) ? e.pageX : e.touches[0].pageX);
 
             return events;
+        }
+
+        /**
+        * As IE >= 10 fires both touch and mouse events when using a mouse in a touchscreen
+        * this way we make sure that is really a touch event what IE is detecting.
+        */
+        function isReallyTouch(e){
+            //if is not IE   ||  IE is detecting `touch` or `pen`
+            return typeof e.pointerType === 'undefined' || e.pointerType != 'mouse';
         }
 
         /**
         * Getting the starting possitions of the touch event
         */
         function touchStartHandler(event){
-
             var e = event.originalEvent;
-            var touchEvents = getEventsPage(e);
-            touchStartY = touchEvents['y'];
+
+            if(isReallyTouch(e)){
+                var touchEvents = getEventsPage(e);
+                touchStartY = touchEvents.y;
+                touchStartX = touchEvents.x;
+            }
         }
 
         /* Detecting touch events
@@ -655,27 +790,40 @@
         function touchMoveHandler(event){
             var e = event.originalEvent;
 
-            event.preventDefault();
-
             // additional: if one of the normalScrollElements isn't within options.normalScrollElementTouchThreshold hops up the DOM chain
-            if (!checkParentForNormalScrollElement(event.target)) {
+            if ( !checkParentForNormalScrollElement(event.target) && isReallyTouch(e) ) {
+
                 var activeSection = $('.pp-section.active');
                 var scrollable = isScrollable(activeSection);
 
+                if(!scrollable.length){
+                    event.preventDefault();
+                }
+
                 if (!isMoving()) {
                     var touchEvents = getEventsPage(e);
-                    touchEndY = touchEvents['y'];
-                    touchEndX = touchEvents['x'];
+                    touchEndY = touchEvents.y;
+                    touchEndX = touchEvents.x;
 
                   //$('body').append('<span style="position:fixed; top: 250px; left: 20px; z-index:88; font-size: 25px; color: #000;">touchEndY: ' + touchEndY  + '</div>');
 
-
-                    //is the movement greater than the minimum resistance to scroll?
-                    if (Math.abs(touchStartY - touchEndY) > (container.height() / 100 * options.touchSensitivity)) {
-                        if (touchStartY > touchEndY) {
-                            scrolling('down', scrollable);
-                        } else if (touchEndY > touchStartY) {
-                            scrolling('up', scrollable);
+                    //X movement bigger than Y movement?
+                    if (options.direction === 'horizontal' && Math.abs(touchStartX - touchEndX) > (Math.abs(touchStartY - touchEndY))) {
+                        //is the movement greater than the minimum resistance to scroll?
+                        if (Math.abs(touchStartX - touchEndX) > (container.width() / 100 * options.touchSensitivity)) {
+                            if (touchStartX > touchEndX) {
+                                scrolling('down', scrollable);
+                            } else if (touchEndX > touchStartX) {
+                                scrolling('up', scrollable);
+                            }
+                        }
+                    } else {
+                        if (Math.abs(touchStartY - touchEndY) > (container.height() / 100 * options.touchSensitivity)) {
+                            if (touchStartY > touchEndY) {
+                                scrolling('down', scrollable);
+                            } else if (touchEndY > touchStartY) {
+                                scrolling('up', scrollable);
+                            }
                         }
                     }
                 }
@@ -720,7 +868,7 @@
                 if(options.anchors.length){
                     link = options.anchors[cont];
                 }
-                if(typeof options.navigation.tooltips !== 'undefined'){
+                if(options.navigation.tooltips !== 'undefined'){
                     var tooltip = options.navigation.tooltips[cont];
                     if(typeof tooltip === 'undefined'){
                         tooltip = '';
@@ -739,6 +887,7 @@
         $(document).on('click touchstart', '#pp-nav a', function(e){
             e.preventDefault();
             var index = $(this).parent().index();
+
             scrollPage($('.pp-section').eq(index));
         });
 
@@ -802,15 +951,26 @@
 
             for (var t in transforms) {
                 if (el.style[t] !== undefined) {
-                    el.style[t] = "translate3d(1px,1px,1px)";
+                    el.style[t] = 'translate3d(1px,1px,1px)';
                     has3d = window.getComputedStyle(el).getPropertyValue(transforms[t]);
                 }
             }
 
             document.body.removeChild(el);
 
-            return (has3d !== undefined && has3d.length > 0 && has3d !== "none");
+            return (has3d !== undefined && has3d.length > 0 && has3d !== 'none');
+        }
+
+        /**
+        * Gets the translate3d property to apply when using css3:true depending on the `direction` option.
+        */
+        function getTranslate3d(){
+            if (options.direction !== 'vertical') {
+                  return 'translate3d(-100%, 0px, 0px)';
+            }
+
+            return 'translate3d(0px, -100%, 0px)';
         }
 
     };
-})(jQuery);
+})(jQuery, document, window);

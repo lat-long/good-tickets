@@ -235,6 +235,7 @@ p{
  * --------------------------------------- */
 #section1 h1{
 	color: #444;
+	margin-bottom: .5em;
 }
 #section1 p{
 	color: #333;
