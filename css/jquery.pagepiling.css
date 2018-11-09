@@ -1,12 +1,11 @@
-/* ===========================================================
- * pagepiling.js 0.0.1 (Beta)
+/*!
+ * pagepiling.js 1.5.5
  *
- * https://github.com/alvarotrigo/fullPage.js
- * MIT licensed
+ * https://github.com/alvarotrigo/pagePiling.js
+ * @license MIT licensed
  *
- * Copyright (C) 2013 alvarotrigo.com - A project by Alvaro Trigo
- *
- * ========================================================== */
+ * Copyright (C) 2016 alvarotrigo.com - A project by Alvaro Trigo
+ */
 html, body {
     overflow:hidden;
     margin:0;
@@ -122,4 +121,8 @@ html, body {
 }
 .pp-tooltip.left {
     left: 20px;
+}
+.pp-scrollable{
+    overflow-y: scroll;
+    height: 100%;
 }

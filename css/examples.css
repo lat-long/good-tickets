@@ -111,6 +111,7 @@ p{
 	margin: 0 auto;
 	font-size: 1.5em;
 	margin-top: 2em;
+	line-height: 1.4em;
 }
 .twitter-share-button{
 	position: fixed;
@@ -235,6 +236,7 @@ p{
  * --------------------------------------- */
 #section1 h1{
 	color: #444;
+	margin-bottom: .5em;
 }
 #section1 p{
 	color: #333;
@@ -271,9 +273,6 @@ p{
 	left: 60px;
 	bottom: 0;
 }
-#section3 p{
-	color: #757575;
-}
 
 #colors2,
 #colors3{
@@ -305,4 +304,96 @@ p{
 * --------------------------------------- */
 #pp-nav.custom .pp-tooltip{
 	color: #AAA;
+}
+
+
+/*Customize*/
+
+p q {
+	background: rgba(255, 255, 255, .9);
+	-webkit-border-radius: 6px;
+	border-radius: 6px;
+	padding: .1em .5em;
+	margin: 0 .5em;
+	opacity: 1;
+	color: #000;
+	font-size: .9em;
+}
+p q::before{
+	content: "\201C";
+}
+p q::after {
+	content: "\201D";
+}
+
+ol {
+	list-style-type: decimal !important;
+	list-style-position: inside;
+}
+h3 {
+	font-size: 1.4em;
+}
+small {
+	font-size: .7em;
+}
+/* Section 1
+ * --------------------------------------- */
+#section1 h1{
+	color: #444;
+}
+#section1 p{
+	color: #333;
+	color: rgba(0,0,0,0.3);
+}
+#section1 img{
+	margin: 20px 0;
+	opacity: 0.7;
+}
+
+/* Section 2
+ * --------------------------------------- */
+#section2 h1,
+#section2 p{
+	z-index: 3;
+}
+#section2 p{
+	opacity: 0.8;
+}
+
+/* Section 3
+ * --------------------------------------- */
+#section3 #colors{
+	left: 60px;
+	bottom: 0;
+}
+#section3 h1{
+	color: #D10000;
+}
+#section3 p{
+	color: #010B3F;
+}
+#section3 p q{
+	background-color: #010B3F;
+	color: #fff;
+}
+/* Section 4
+ * --------------------------------------- */
+#section4 p{
+	opacity: 0.6;
+}
+
+#section7 a, 	#section7 a:visited {
+	color: #3D9970;
+}
+
+/* Overwriting fullPage.js tooltip color
+* --------------------------------------- */
+#pp-nav.custom .pp-tooltip{
+	color: #AAA;
+}
+#markup{
+	display: block;
+	width: 450px;
+	margin: 20px auto;
+	text-align: left;
 }
